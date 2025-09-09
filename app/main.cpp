@@ -5,7 +5,10 @@
  *********************************************************************************************************************/
 
 #include <vector>
-#include <GL/glut.h>
+#define FREEGLUT_EXT
+
+#include <GL/freeglut.h>
+//#include <GL/glut.h>
 #include "camera_trackball.h"
 
 #include "imgui/imgui.h"
@@ -229,6 +232,19 @@ void mouseMotion(int x, int y)
     if (mouse_buttons[GLUT_RIGHT_BUTTON] == GLUT_DOWN)
         camera.pan(dxn, dyn, 0.0f);
 }
+// Mouse wheel handler (requires freeglut)
+void mouseWheel(int wheel, int direction, int x, int y) {
+    std::cout << "mouseWheel: wheel=" << wheel
+              << " direction=" << direction
+              << " x=" << x << " y=" << y << std::endl;
+    float step = 5.0f; //  zoom step
+    if (direction > 0) {
+        camera.zoom(-step); // zoom in
+    } else {
+        camera.zoom(step);  // zoom out
+    }
+    glutPostRedisplay();
+}
 
 void timer(int v)
 {
@@ -268,7 +284,10 @@ int main(int argc, char **argv)
     glutMouseFunc(mouseButton);
     glutKeyboardFunc(processKeys);
     glutMotionFunc(mouseMotion);
-
+#ifdef FREEGLUT
+    glutMouseWheelFunc(mouseWheel);
+#endif
+ 
     glutMainLoop();
 
     ImGui_ImplOpenGL2_Shutdown();
