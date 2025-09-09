@@ -13,6 +13,14 @@ I used the *Dear ImGui* library for the graphical user interface (See https://gi
 
 ## 1 - Installation
 
+Dependencies (tested on popos24 / ubuntu 24)
+
+sudo apt install libglew-dev
+sudo apt install libgl1-mesa-dev
+sudo apt install libeigen3-dev
+sudo apt install freeglut3-dev
+
+
 First, clone the repository.
 ```
 git clone https://github.com/ThomasParistech/boids.git
