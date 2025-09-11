@@ -49,8 +49,8 @@ std::vector<Obstacle> obstacles_;
 int boids_number_ = 50; // 100; //1000; 
 float neighborhood_max_dist = 10.0f;
 float separation_weight = 0.02f;
-float alignment_weight = 0.5f;
-float cohesion_weight = 0.5f;
+float alignment_weight = 0.005f;
+float cohesion_weight = 0.07f;
 float boundary_weight = 5.0f;
 
 // --- DUMMY FUNCTION TO SIMULATE SETTING THE WEIGHTS ---
@@ -77,6 +77,7 @@ void parse_command_line_args(int argc, char** argv) {
                 }
             }
         } 
+        // neighborhood  max distance
         else if (arg == "--maxdist") {
             if (i + 1 < argc) {
                 try {
@@ -95,23 +96,24 @@ void parse_command_line_args(int argc, char** argv) {
                 }
             }
         } 
-        //else if (arg == "--alignment") {
-        //     if (i + 1 < argc) {
-        //         try {
-        //             alignment_weight = std::stof(argv[++i]);
-        //         } catch (const std::exception& e) {
-        //             std::cerr << "Error: --alignment requires a float argument. Using default." << std::endl;
-        //         }
-        //     }
-        // } else if (arg == "--cohesion") {
-        //     if (i + 1 < argc) {
-        //         try {
-        //             cohesion_weight = std::stof(argv[++i]);
-        //         } catch (const std::exception& e) {
-        //             std::cerr << "Error: --cohesion requires a float argument. Using default." << std::endl;
-        //         }
-        //     }
-        // } else if (arg == "--boundary") {
+        else if (arg == "--alignment") {
+            if (i + 1 < argc) {
+                try {
+                    alignment_weight = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --alignment requires a float argument. Using default." << std::endl;
+                }
+            }
+        } else if (arg == "--cohesion") {
+            if (i + 1 < argc) {
+                try {
+                    cohesion_weight = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --cohesion requires a float argument. Using default." << std::endl;
+                }
+            }
+        } 
+        //else if (arg == "--boundary") {
         //     if (i + 1 < argc) {
         //         try {
         //             boundary_weight = std::stof(argv[++i]);
@@ -123,6 +125,8 @@ void parse_command_line_args(int argc, char** argv) {
     }
 }
 
+// Boid are characterized by their position and speed
+// set position and speed initial values
 void add_boid()
 {
     int scale = 1;
@@ -189,8 +193,14 @@ void display()
     MovingObject::setSeparationWeight(temp_separation_weight);
 
     // ImGui::SliderFloat("Separation", &MovingObject::separation_factor_, 0.0f, 0.1f);
-    ImGui::SliderFloat("Cohesion", &MovingObject::cohesion_factor_, 0.0f, 0.1f);
-    ImGui::SliderFloat("Alignment", &MovingObject::alignment_factor_, 0.0f, 0.02f);
+    float temp_cohesion_weight = MovingObject::getCohesionWeight();
+    ImGui::SliderFloat("Cohesion", &temp_cohesion_weight, 0.0f, 0.1f);
+    // ImGui::SliderFloat("Cohesion", &MovingObject::cohesion_factor_, 0.0f, 0.1f);
+    MovingObject::setCohesionWeight(temp_cohesion_weight);
+    float temp_align_weight = MovingObject::getAlignmentWeight();
+    ImGui::SliderFloat("Alignment", &temp_align_weight, 0.0f, 0.02f);
+    // ImGui::SliderFloat("Alignment", &MovingObject::alignment_factor_, 0.0f, 0.02f);
+    MovingObject::setAlignmentWeight(temp_align_weight);
     ImGui::SliderFloat("Target attraction", &Target::target_attraction_factor_, 0.0f, 1.f);
     ImGui::SliderFloat("Target speed attraction", &Target::target_speed_alignment_factor_, 0.0f, 0.05f);
     ImGui::SliderFloat("Obstacle", &Obstacle::obstacle_factor_, 0.f, 200.f);

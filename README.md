@@ -13,7 +13,9 @@ I used the *Dear ImGui* library for the graphical user interface (See https://gi
 
 ## 0 - Modifications (diplodocuslongus)
 
-- CMakeLists modif so the code runs on ubuntu 24- Command line argument inputs
+- CMakeLists modif so the code runs on ubuntu 22/24
+- fix zoom in out with mouse wheel scroll
+- Command line argument inputs
 
 ## 1 - Installation
 

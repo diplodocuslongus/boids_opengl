@@ -72,8 +72,11 @@ void Boid::update(float t)
         const Vec3f cohesion_force = avg_position_ / n_neighbors_ - position_;
         const Vec3f alignment_force = avg_speed_ / n_neighbors_ - speed_;
 
-        speed_incr += cohesion_factor_ * cohesion_force;
-        speed_incr += alignment_factor_ * alignment_force;
+        float coh_weight = MovingObject::getCohesionWeight();
+        speed_incr += coh_weight * cohesion_force;
+        // speed_incr += cohesion_factor_ * cohesion_force;
+        float align_weight = MovingObject::getAlignmentWeight();
+        speed_incr += align_weight * alignment_force;
     }
 
     const float dv_x = -0.5 + static_cast<float>(std::rand()) / RAND_MAX;

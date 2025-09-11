@@ -30,6 +30,8 @@ public:
     // static getter
     static float getSeparationWeight();
     static float getNeighborMaxDist();
+    static float getCohesionWeight();
+    static float getAlignmentWeight();
     // Static setter methods to modify the weights.
     // These are what `main.cpp` will call to configure the simulation.
     static void setNeighborMaxDist(float weight);
@@ -54,8 +56,8 @@ public:
     // static float neighborhood_max_dist_;
     static float separation_min_dist_;
     // static float separation_factor_;
-    static float cohesion_factor_;
-    static float alignment_factor_;
+    // static float cohesion_factor_;
+    // static float alignment_factor_;
     static float randomness_;
     static float max_speed_;
     static float min_cos_angle_;

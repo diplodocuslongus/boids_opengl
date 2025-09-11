@@ -10,8 +10,8 @@
 // The default values here match those in `main.cpp` for consistency.
 float MovingObject::s_neighborhood_max_dist = 10.0f; //  
 float MovingObject::s_separation_weight = 0.02f; //  separation_factor
-float MovingObject::s_alignment_weight = 0.5f;
-float MovingObject::s_cohesion_weight = 0.5f;
+float MovingObject::s_alignment_weight = 0.005f;
+float MovingObject::s_cohesion_weight = 0.07f;
 float MovingObject::s_boundary_weight = 5.0f;
 
 // float MovingObject::neighborhood_max_dist_ = 10;
@@ -19,8 +19,8 @@ float MovingObject::s_boundary_weight = 5.0f;
 float MovingObject::separation_min_dist_ = 1;
 
 // float MovingObject::separation_factor_ = 0.02;
-float MovingObject::cohesion_factor_ = 0.07;
-float MovingObject::alignment_factor_ = 0.005;
+// float MovingObject::cohesion_factor_ = 0.07;
+// float MovingObject::alignment_factor_ = 0.005;
 
 float MovingObject::randomness_ = 0;
 float MovingObject::max_speed_ = 10.f;
@@ -35,6 +35,12 @@ float MovingObject::getNeighborMaxDist() {
 }
 float MovingObject::getSeparationWeight() {
     return s_separation_weight;
+}
+float MovingObject::getCohesionWeight() {
+    return s_cohesion_weight;
+}
+float MovingObject::getAlignmentWeight() {
+    return s_alignment_weight;
 }
 
 // Implement the static setter methods.
