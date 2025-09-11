@@ -56,9 +56,11 @@ Vec3f Boid::get_exerced_proximity_force(const MovingObject &object) const
         return Vec3f(0, 0, 0);
 
     // Separation
+    float sep_weight = MovingObject::getSeparationWeight();
     const Vec3f diff = object.get_position() - position_;
     const auto dist = std::max(separation_min_dist_, diff.norm()); // In case close to zero
-    return separation_factor_ * diff / (dist * dist);
+    return sep_weight * diff / (dist * dist);
+    // return separation_factor_ * diff / (dist * dist);
 }
 
 void Boid::update(float t)

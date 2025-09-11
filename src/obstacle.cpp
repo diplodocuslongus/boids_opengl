@@ -9,7 +9,7 @@
 #include "obstacle.h"
 #include "gl_utils.h"
 
-float Obstacle::obstacle_factor_ = 100.f;
+float Obstacle::obstacle_factor_ = 10.f; //100.f
 
 Obstacle::Obstacle(const Vec3f &position, float radius) : MovingObject(position)
 {

@@ -46,7 +46,82 @@ int crt_target_id_ = 0;
 
 std::vector<Obstacle> obstacles_;
 
-int boids_number_ = 1000;
+int boids_number_ = 50; // 100; //1000; 
+float neighborhood_max_dist = 10.0f;
+float separation_weight = 0.02f;
+float alignment_weight = 0.5f;
+float cohesion_weight = 0.5f;
+float boundary_weight = 5.0f;
+
+// --- DUMMY FUNCTION TO SIMULATE SETTING THE WEIGHTS ---
+// This function assumes `MovingObject.hpp` has been updated with the
+// static setter methods as shown in our previous conversation.
+void set_boid_weights(float maxdist,float sep, float align, float coh, float bound) {
+    MovingObject::setNeighborMaxDist(maxdist);
+    MovingObject::setSeparationWeight(sep);
+    MovingObject::setAlignmentWeight(align);
+    MovingObject::setCohesionWeight(coh);
+    MovingObject::setBoundaryWeight(bound);
+}
+// parse command-line arguments.
+void parse_command_line_args(int argc, char** argv) {
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "--nb_boids") {
+            if (i + 1 < argc) {
+                try {
+                    boids_number_ = std::stoi(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --nb_boids requires an integer argument. Using default." << std::endl;
+                }
+            }
+        } 
+        else if (arg == "--maxdist") {
+            if (i + 1 < argc) {
+                try {
+                    neighborhood_max_dist = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --maxdist requires a float argument. Using default." << std::endl;
+                }
+            }
+        } 
+        else if (arg == "--separation") {
+            if (i + 1 < argc) {
+                try {
+                    separation_weight = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --separation requires a float argument. Using default." << std::endl;
+                }
+            }
+        } 
+        //else if (arg == "--alignment") {
+        //     if (i + 1 < argc) {
+        //         try {
+        //             alignment_weight = std::stof(argv[++i]);
+        //         } catch (const std::exception& e) {
+        //             std::cerr << "Error: --alignment requires a float argument. Using default." << std::endl;
+        //         }
+        //     }
+        // } else if (arg == "--cohesion") {
+        //     if (i + 1 < argc) {
+        //         try {
+        //             cohesion_weight = std::stof(argv[++i]);
+        //         } catch (const std::exception& e) {
+        //             std::cerr << "Error: --cohesion requires a float argument. Using default." << std::endl;
+        //         }
+        //     }
+        // } else if (arg == "--boundary") {
+        //     if (i + 1 < argc) {
+        //         try {
+        //             boundary_weight = std::stof(argv[++i]);
+        //         } catch (const std::exception& e) {
+        //             std::cerr << "Error: --boundary requires a float argument. Using default." << std::endl;
+        //         }
+        //     }
+        // }
+    }
+}
 
 void add_boid()
 {
@@ -88,13 +163,13 @@ void init(void)
     for (double k : {-9, 9})
         targets_.emplace_back(scale * Vec3f(0, 0, k));
 
-    for (double j : {-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7})
-        for (double k : {-7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7})
-            obstacles_.emplace_back(scale * Vec3f(0, j, k), scale);
-
-    for (double j : {-7, -6, -5, -4, -3, 0, 3, 4, 5, 6, 7})
-        for (double k : {-1, 0, 1})
-            obstacles_.emplace_back(scale * Vec3f(0, j, k), scale);
+    // for (double j : {-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7})
+    //     for (double k : {-7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7})
+    //         obstacles_.emplace_back(scale * Vec3f(0, j, k), scale);
+    //
+    // for (double j : {-7, -6, -5, -4, -3, 0, 3, 4, 5, 6, 7})
+    //     for (double k : {-1, 0, 1})
+    //         obstacles_.emplace_back(scale * Vec3f(0, j, k), scale);
 }
 
 void display()
@@ -106,8 +181,14 @@ void display()
 
     ImGui::Begin("Test");
     ImGui::SliderInt("Number of boids", &boids_number_, 0, 2000);
-    ImGui::SliderFloat("Neighbor Distance", &MovingObject::neighborhood_max_dist_, 0.0f, 12.f);
-    ImGui::SliderFloat("Separation", &MovingObject::separation_factor_, 0.0f, 0.1f);
+    float temp_neighbor_max_dist = MovingObject::getNeighborMaxDist();
+    ImGui::SliderFloat("Neighbor Distance", &temp_neighbor_max_dist, 0.0f, 12.f);
+    MovingObject::setNeighborMaxDist(temp_neighbor_max_dist);
+    float temp_separation_weight = MovingObject::getSeparationWeight();
+    ImGui::SliderFloat("Separation", &temp_separation_weight, 0.0f, 10.0f);
+    MovingObject::setSeparationWeight(temp_separation_weight);
+
+    // ImGui::SliderFloat("Separation", &MovingObject::separation_factor_, 0.0f, 0.1f);
     ImGui::SliderFloat("Cohesion", &MovingObject::cohesion_factor_, 0.0f, 0.1f);
     ImGui::SliderFloat("Alignment", &MovingObject::alignment_factor_, 0.0f, 0.02f);
     ImGui::SliderFloat("Target attraction", &Target::target_attraction_factor_, 0.0f, 1.f);
@@ -255,6 +336,9 @@ void timer(int v)
 // Main function: GLUT runs as a console application
 int main(int argc, char **argv)
 {
+    parse_command_line_args(argc, argv);
+    set_boid_weights(neighborhood_max_dist, separation_weight, alignment_weight, cohesion_weight, boundary_weight);
+
     // Init GLUT and create window
     glutInit(&argc, argv);
     glutInitWindowSize(window_w, window_h);

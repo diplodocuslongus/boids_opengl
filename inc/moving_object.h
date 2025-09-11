@@ -13,7 +13,31 @@ using Vec3f = Eigen::Vector3f;
 
 class MovingObject
 {
+private:
+    // glm::vec3 position;
+    // glm::vec3 velocity;
+    // glm::vec3 acceleration;
+
+    // Static member variables to hold the weights for boid behavior.
+    // These will be shared by all instances of the MovingObject class.
+    static float s_neighborhood_max_dist;
+    static float s_separation_weight;
+    // static float separation_min_dist_;
+    static float s_alignment_weight;
+    static float s_cohesion_weight;
+    static float s_boundary_weight;
 public:
+    // static getter
+    static float getSeparationWeight();
+    static float getNeighborMaxDist();
+    // Static setter methods to modify the weights.
+    // These are what `main.cpp` will call to configure the simulation.
+    static void setNeighborMaxDist(float weight);
+    static void setSeparationWeight(float weight);
+    static void setAlignmentWeight(float weight);
+    static void setCohesionWeight(float weight);
+    static void setBoundaryWeight(float weight);
+
     MovingObject(const Vec3f &position, const Vec3f &speed = Vec3f(0, 0, 0));
 
     virtual ~MovingObject() = default;
@@ -27,9 +51,9 @@ public:
     virtual void update(float t) = 0;
     virtual void draw() const = 0;
 
-    static float neighborhood_max_dist_;
+    // static float neighborhood_max_dist_;
     static float separation_min_dist_;
-    static float separation_factor_;
+    // static float separation_factor_;
     static float cohesion_factor_;
     static float alignment_factor_;
     static float randomness_;

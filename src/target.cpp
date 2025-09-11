@@ -9,7 +9,7 @@
 #include "target.h"
 #include "gl_utils.h"
 
-float Target::target_attraction_factor_ = 0.02f;
+float Target::target_attraction_factor_ = 0.0f; // 0.02f;
 float Target::target_speed_alignment_factor_ = 0.03f;
 
 Target::Target(const Vec3f &position, UpdateSpeedFunc update_speed_func) : MovingObject(position)

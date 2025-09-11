@@ -11,14 +11,18 @@ Implementation of Craig Reynolds' boids, which simulate the flocking behaviour o
 
 I used the *Dear ImGui* library for the graphical user interface (See https://github.com/ocornut/imgui).
 
+## 0 - Modifications (diplodocuslongus)
+
+- CMakeLists modif so the code runs on ubuntu 24- Command line argument inputs
+
 ## 1 - Installation
 
 Dependencies (tested on popos24 / ubuntu 24)
 
-sudo apt install libglew-dev
-sudo apt install libgl1-mesa-dev
-sudo apt install libeigen3-dev
-sudo apt install freeglut3-dev
+    sudo apt install libglew-dev
+    sudo apt install libgl1-mesa-dev
+    sudo apt install libeigen3-dev
+    sudo apt install freeglut3-dev
 
 
 First, clone the repository.
@@ -55,3 +59,22 @@ Cohesion rule:
 Object attirance/avoidance rule:
 ![](./images/holecross2.gif)
 ![](./images/hole_boid.gif)
+
+## simulation parameters
+
+Most are self explanatory.
+<!--  -->
+neighborhood_max_disti: defines the 
+
+separation_min_dist_ = 1;
+
+separation_factor_ = 0.02;
+cohesion_factor_ = 0.07;
+alignment_factor_ = 0.005;
+
+randomness_ = 0;
+max_speed_ = 10.f;
+
+min_cos_angle_ = -0.5f;
+
+next_id_ = 0;
