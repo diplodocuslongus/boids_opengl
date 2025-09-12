@@ -18,27 +18,37 @@ private:
     // glm::vec3 velocity;
     // glm::vec3 acceleration;
 
-    // Static member variables to hold the weights for boid behavior.
-    // These will be shared by all instances of the MovingObject class.
+    // Static member variables to hold the boid parameters and weights for boid behavior.
+    static int s_boid_number;
     static float s_neighborhood_max_dist;
     static float s_separation_weight;
     // static float separation_min_dist_;
     static float s_alignment_weight;
     static float s_cohesion_weight;
     static float s_boundary_weight;
+    static float s_max_speed;
+    static float s_target_attraction_weight;
+    static float s_target_speed_alignment_weight;
 public:
-    // static getter
+    // static parameters getter
+    static int getBoidNumber();
     static float getSeparationWeight();
     static float getNeighborMaxDist();
     static float getCohesionWeight();
     static float getAlignmentWeight();
+    static float getMaxSpeed();
+    static float getTargetAttractionWeight();
+    static float getTargetSpeedAlignmentWeight();
     // Static setter methods to modify the weights.
     // These are what `main.cpp` will call to configure the simulation.
+    static void setBoidNumber(int nbboids);
     static void setNeighborMaxDist(float weight);
     static void setSeparationWeight(float weight);
     static void setAlignmentWeight(float weight);
     static void setCohesionWeight(float weight);
-    static void setBoundaryWeight(float weight);
+    static void setMaxSpeed(float speed);
+    static void setTargetAttractionWeight(float weight);
+    static void setTargetSpeedAlignmentWeight(float weight);
 
     MovingObject(const Vec3f &position, const Vec3f &speed = Vec3f(0, 0, 0));
 
@@ -52,6 +62,7 @@ public:
     virtual Vec3f get_exerced_proximity_force(const MovingObject &boid) const = 0;
     virtual void update(float t) = 0;
     virtual void draw() const = 0;
+    // virtual void draw_boid() const = 0;
 
     // static float neighborhood_max_dist_;
     static float separation_min_dist_;
@@ -59,7 +70,7 @@ public:
     // static float cohesion_factor_;
     // static float alignment_factor_;
     static float randomness_;
-    static float max_speed_;
+    // static float max_speed_;
     static float min_cos_angle_;
 
     static bool are_neighbors(const MovingObject &left, const MovingObject &right);

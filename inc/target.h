@@ -28,8 +28,8 @@ public:
 
     void draw() const override;
 
-    static float target_attraction_factor_;
-    static float target_speed_alignment_factor_;
+    // static float target_attraction_factor_;
+    // static float target_speed_alignment_factor_;
 
 private:
     float last_t_;

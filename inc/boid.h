@@ -22,6 +22,7 @@ public:
     void update(float t) override;
 
     void draw() const override;
+    // void draw_boid() const override;
 
 private:
     void draw_wing() const;

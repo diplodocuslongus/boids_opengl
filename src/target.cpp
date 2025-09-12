@@ -9,8 +9,8 @@
 #include "target.h"
 #include "gl_utils.h"
 
-float Target::target_attraction_factor_ = 0.1f; // 0.02f;
-float Target::target_speed_alignment_factor_ = 0.03f;
+// float Target::target_attraction_factor_ = 0.1f; // 0.02f;
+// float Target::target_speed_alignment_factor_ = 0.03f;
 
 Target::Target(const Vec3f &position, UpdateSpeedFunc update_speed_func) : MovingObject(position)
 {
@@ -26,8 +26,12 @@ Vec3f Target::get_exerced_proximity_force(const MovingObject &object) const
     if (object.get_id() == id_) // Can't repel itself
         return Vec3f(0, 0, 0);
 
-    return target_attraction_factor_ * (position_ - object.get_position()) +
-           target_speed_alignment_factor_ * (speed_ - object.get_speed()); // Attract
+    float tmp_target_attract_weight = MovingObject::getTargetAttractionWeight();
+    float tmp_target_speed_align_weight = MovingObject::getTargetSpeedAlignmentWeight();
+    // return target_attraction_factor_ * (position_ - object.get_position()) +
+    //        target_speed_alignment_factor_ * (speed_ - object.get_speed()); // Attract
+    return tmp_target_attract_weight * (position_ - object.get_position()) +
+           tmp_target_speed_align_weight * (speed_ - object.get_speed()); // Attract
 }
 
 void Target::update(float t)

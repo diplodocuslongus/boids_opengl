@@ -46,32 +46,56 @@ int crt_target_id_ = 0;
 
 std::vector<Obstacle> obstacles_;
 
-int boids_number_ = 50; // 100; //1000; 
+int boids_number = 50; // 100; //1000; 
 float neighborhood_max_dist = 10.0f;
 float separation_weight = 0.02f;
 float alignment_weight = 0.005f;
 float cohesion_weight = 0.07f;
-float boundary_weight = 5.0f;
+float max_speed = 10.0f;
+float target_attraction_weight = 0.02f;
+float target_speed_alignment_weight = 0.03f;
 
-// --- DUMMY FUNCTION TO SIMULATE SETTING THE WEIGHTS ---
-// This function assumes `MovingObject.hpp` has been updated with the
-// static setter methods as shown in our previous conversation.
-void set_boid_weights(float maxdist,float sep, float align, float coh, float bound) {
+// help
+void printHelp() {
+    std::cout << "Usage: ./bin/./main [options]" << std::endl;
+    std::cout << "Boid simulation." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -h, --help       Display this help message and exit." << std::endl;
+    std::cout << "--nb_boids    Number of boids in the simulation" << std::endl;
+    std::cout << "--maxdist     Maxmum distance between boids    " << std::endl;
+    std::cout << "--separation  Separation weight                " << std::endl;
+    std::cout << "--alignment   Alignment weight                 " << std::endl;
+    std::cout << "--cohesion    Cohesion weight                  " << std::endl;
+    std::cout << "--maxspeed    Maximum boid speed               " << std::endl;
+    std::cout << "--targetattract Attraction to target weight    " << std::endl;
+    std::cout << "--targetspeedalign Speed of alignment to target" << std::endl;
+}
+// --- SET THE WEIGHTS AND PARAMETERS ---
+void set_boid_params(int nbboids,float maxdist,float maxspeed,float targetattract, float targetspeedalign) {
+    MovingObject::setBoidNumber(nbboids);
     MovingObject::setNeighborMaxDist(maxdist);
+    MovingObject::setMaxSpeed(maxspeed);
+    MovingObject::setTargetAttractionWeight(targetattract);
+    MovingObject::setTargetSpeedAlignmentWeight(targetspeedalign);
+}
+void set_boid_weights(float sep, float align, float coh) {
     MovingObject::setSeparationWeight(sep);
     MovingObject::setAlignmentWeight(align);
     MovingObject::setCohesionWeight(coh);
-    MovingObject::setBoundaryWeight(bound);
 }
 // parse command-line arguments.
-void parse_command_line_args(int argc, char** argv) {
+int parse_command_line_args(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-
-        if (arg == "--nb_boids") {
+        if (arg == "--help" || arg == "-h") {
+            printHelp();
+            return 1; // Exit 
+        }
+        else if (arg == "--nb_boids") {
             if (i + 1 < argc) {
                 try {
-                    boids_number_ = std::stoi(argv[++i]);
+                    boids_number = std::stoi(argv[++i]);
                 } catch (const std::exception& e) {
                     std::cerr << "Error: --nb_boids requires an integer argument. Using default." << std::endl;
                 }
@@ -113,19 +137,38 @@ void parse_command_line_args(int argc, char** argv) {
                 }
             }
         } 
-        //else if (arg == "--boundary") {
-        //     if (i + 1 < argc) {
-        //         try {
-        //             boundary_weight = std::stof(argv[++i]);
-        //         } catch (const std::exception& e) {
-        //             std::cerr << "Error: --boundary requires a float argument. Using default." << std::endl;
-        //         }
-        //     }
-        // }
+        else if (arg == "--maxspeed") {
+            if (i + 1 < argc) {
+                try {
+                    max_speed = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --maxspeed requires a float argument. Using default." << std::endl;
+                }
+            }
+        }
+        else if (arg == "--targetattract") {
+            if (i + 1 < argc) {
+                try {
+                    target_attraction_weight = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --targetattract requires a float argument. Using default." << std::endl;
+                }
+            }
+        }
+        else if (arg == "--targetspeedalign") {
+            if (i + 1 < argc) {
+                try {
+                    target_speed_alignment_weight = std::stof(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: --targetspeedalign requires a float argument. Using default." << std::endl;
+                }
+            }
+        }
     }
+    return 0; // 
 }
 
-// Boid are characterized by their position and speed
+// Boids are characterized by their position and speed
 // set position and speed initial values
 void add_boid()
 {
@@ -157,7 +200,8 @@ void init(void)
     // Init camera
     camera.init({0.0f, 0.0f, 0.0f}, 30.0f);
 
-    for (int j = 0; j < boids_number_; j++)
+    // for (int j = 0; j < boids_number_; j++)
+    for (int j = 0; j < boids_number; j++)
         add_boid();
 
     const int scale = 3;
@@ -167,6 +211,7 @@ void init(void)
     for (double k : {-9, 9})
         targets_.emplace_back(scale * Vec3f(0, 0, k));
 
+    // define obstacle
     // for (double j : {-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7})
     //     for (double k : {-7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7})
     //         obstacles_.emplace_back(scale * Vec3f(0, j, k), scale);
@@ -184,7 +229,10 @@ void display()
     ImGui_ImplGLUT_NewFrame();
 
     ImGui::Begin("Test");
-    ImGui::SliderInt("Number of boids", &boids_number_, 0, 2000);
+    int temp_boid_nb = MovingObject::getBoidNumber();
+    // ImGui::SliderInt("Number of boids", &boids_number_, 0, 2000);
+    ImGui::SliderInt("Number of boids", &boids_number, 0, 2000);
+    MovingObject::setBoidNumber(temp_boid_nb);
     float temp_neighbor_max_dist = MovingObject::getNeighborMaxDist();
     ImGui::SliderFloat("Neighbor Distance", &temp_neighbor_max_dist, 0.0f, 12.f);
     MovingObject::setNeighborMaxDist(temp_neighbor_max_dist);
@@ -201,11 +249,19 @@ void display()
     ImGui::SliderFloat("Alignment", &temp_align_weight, 0.0f, 0.02f);
     // ImGui::SliderFloat("Alignment", &MovingObject::alignment_factor_, 0.0f, 0.02f);
     MovingObject::setAlignmentWeight(temp_align_weight);
-    ImGui::SliderFloat("Target attraction", &Target::target_attraction_factor_, 0.0f, 1.f);
-    ImGui::SliderFloat("Target speed attraction", &Target::target_speed_alignment_factor_, 0.0f, 0.05f);
+    float temp_targt_attraction_weight = MovingObject::getTargetAttractionWeight();
+    // ImGui::SliderFloat("Target attraction", &Target::target_attraction_factor_, 0.0f, 1.f);
+    ImGui::SliderFloat("Target attraction", &temp_targt_attraction_weight, 0.0f, 1.f);
+    MovingObject::setTargetAttractionWeight(temp_targt_attraction_weight);
+    float temp_targt_speed_align_weight = MovingObject::getTargetSpeedAlignmentWeight();
+    ImGui::SliderFloat("Target speed attraction", &temp_targt_speed_align_weight, 0.0f, 0.05f);
+    // ImGui::SliderFloat("Target speed attraction", &Target::target_speed_alignment_factor_, 0.0f, 0.05f);
     ImGui::SliderFloat("Obstacle", &Obstacle::obstacle_factor_, 0.f, 200.f);
     ImGui::SliderFloat("Randomness", &MovingObject::randomness_, 0.0f, 2.f);
-    ImGui::SliderFloat("Max speed", &MovingObject::max_speed_, 0.0f, 20.f);
+    float temp_max_speed = MovingObject::getMaxSpeed();
+    ImGui::SliderFloat("Max speed", &temp_max_speed, 0.0f, 20.f);
+    // ImGui::SliderFloat("Max speed", &MovingObject::max_speed_, 0.0f, 20.f);
+    MovingObject::setMaxSpeed(temp_max_speed);
     ImGui::SliderFloat("Min cos angle", &MovingObject::min_cos_angle_, -1.f, 1.f);
 
     ImGui::End();
@@ -248,20 +304,21 @@ void processKeys(unsigned char key, int x, int y)
     }
     else if (key == 'n')
     {
-        boids_number_++;
+        boids_number++;
+        // boids_number_++;
         add_boid();
     }
 }
 
 void systemEvolution()
 {
-    if (boids_number_ != boids_.size())
+    if (boids_number != boids_.size())
     {
-        if (boids_number_ < boids_.size())
-            boids_.erase(boids_.begin() + boids_number_, boids_.end());
+        if (boids_number < boids_.size())
+            boids_.erase(boids_.begin() + boids_number, boids_.end());
         else
         {
-            const int n_new_boids = boids_number_ - boids_.size();
+            const int n_new_boids = boids_number - boids_.size();
             for (size_t i = 0; i < n_new_boids; i++)
                 add_boid();
         }
@@ -346,8 +403,13 @@ void timer(int v)
 // Main function: GLUT runs as a console application
 int main(int argc, char **argv)
 {
-    parse_command_line_args(argc, argv);
-    set_boid_weights(neighborhood_max_dist, separation_weight, alignment_weight, cohesion_weight, boundary_weight);
+    if (argc < 2) {
+        std::cout << "Using default parameters. Use -h or --help for usage." << std::endl;
+        // return 1;
+    }
+    if (parse_command_line_args(argc, argv) == 1) return 0;
+    set_boid_params(boids_number,neighborhood_max_dist,max_speed,target_attraction_weight ,target_speed_alignment_weight);
+    set_boid_weights( separation_weight, alignment_weight, cohesion_weight);
 
     // Init GLUT and create window
     glutInit(&argc, argv);

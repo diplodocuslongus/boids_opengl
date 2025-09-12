@@ -90,8 +90,11 @@ void Boid::update(float t)
 
     // Clamp speed if needed
     speed_ += speed_incr;
-    if (speed_.norm() > max_speed_)
-        speed_ = max_speed_ * speed_.normalized();
+    float tmp_max_speed = MovingObject::getMaxSpeed();
+    if (speed_.norm() > tmp_max_speed)
+        speed_ = tmp_max_speed * speed_.normalized();
+    // if (speed_.norm() > max_speed_)
+    //     speed_ = max_speed_ * speed_.normalized();
 
     // Update position
     const float dt = (t - last_t_);
@@ -125,27 +128,55 @@ void Boid::draw_wing() const
     glPopMatrix();
 }
 
+// void Boid::draw_boid() const
+// {
+//     glPushMatrix();
+//
+//     glTranslatef(position_[0], position_[1], position_[2]);
+//     GlUtils::align_view(speed_);
+//     GlUtils::draw_box(Vec3f(0.6, 0.1, 0.1), color_);
+//
+//     bool wing_beat = true;
+//     if (wing_beat)
+//     {
+//     glPushMatrix();
+//     glTranslatef(0, 0.1, 0);
+//     draw_wing();
+//     glPopMatrix();
+//
+//     glPushMatrix();
+//     glRotatef(180, 0, 0, 1);
+//     glTranslatef(0, 0.1, 0);
+//     draw_wing();
+//     glPopMatrix();
+//     }
+//     glTranslatef(0.6, 0, 0);
+//     GlUtils::draw_pyramid(Vec3f(0.4, 0.1, 0.1), Vec3f(1.0, 1.0, 0.0));
+//     // GlUtils::draw_pyramid(Vec3f(1.0, 0.2, 0.2), color_);
+//     glPopMatrix();
+// }
+// draw a "X" shape to model a drone
+// could add color (red on the left, greeen on right and white at tail)
 void Boid::draw() const
+// void Boid::draw_drone() const
 {
     glPushMatrix();
 
+    // move boid in place and orient it properly
     glTranslatef(position_[0], position_[1], position_[2]);
     GlUtils::align_view(speed_);
+
+    // draw first arm of the "X"
+    glPushMatrix();
+    glRotatef(-45, 0, 0, 1);
     GlUtils::draw_box(Vec3f(0.6, 0.1, 0.1), color_);
-
+    glPopMatrix();
+    
+    // draw 2nd arm of the "X"
     glPushMatrix();
-    glTranslatef(0, 0.1, 0);
-    draw_wing();
+    glRotatef(45, 0, 0, 1);
+    GlUtils::draw_box(Vec3f(0.6, 0.1, 0.1), color_);
     glPopMatrix();
 
-    glPushMatrix();
-    glRotatef(180, 0, 0, 1);
-    glTranslatef(0, 0.1, 0);
-    draw_wing();
-    glPopMatrix();
-
-    glTranslatef(0.6, 0, 0);
-    GlUtils::draw_pyramid(Vec3f(0.4, 0.1, 0.1), Vec3f(1.0, 1.0, 0.0));
-    // GlUtils::draw_pyramid(Vec3f(1.0, 0.2, 0.2), color_);
     glPopMatrix();
 }
